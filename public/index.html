@@ -271,14 +271,14 @@
     <div id="step-load" class="step active">
       <div class="card">
         <div class="card-title">Welcome</div>
-        <div class="card-sub">Enter your name and paste the quiz code shared by your teacher</div>
+        <div class="card-sub">Enter your name and the short quiz code shared by your teacher</div>
         <div class="field">
           <label>Your name</label>
           <input type="text" id="player-name" placeholder="e.g. Aisha Malik" />
         </div>
         <div class="field">
           <label>Quiz code</label>
-          <textarea id="quiz-code-input" placeholder="Paste the quiz code here..." style="min-height:90px;"></textarea>
+          <input type="text" id="quiz-code-input" placeholder="e.g. K7M2QP" autocomplete="off" maxlength="12" style="font-size:20px;letter-spacing:4px;text-transform:uppercase;text-align:center;font-family:monospace;" />
         </div>
         <div id="load-status"></div>
         <div class="row-end">
@@ -392,10 +392,6 @@ let playerName = '';
 let generatedQuestions = [];
 let adminPw = ''; // held in memory after successful verify; used to authorize generate calls
 
-function computeQuizId(title, ts) {
-  return btoa(unescape(encodeURIComponent((title || '') + '|' + (ts || '')))).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
-}
-
 // ─── Tab switching ────────────────────────────────────────────
 function switchTab(tab) {
   ['quiz','leaderboard','admin'].forEach(t => {
@@ -479,85 +475,101 @@ function renderPreview(questions) {
   document.getElementById('preview-area').innerHTML = html;
 }
 
-function renderPublish(title, questions) {
-  const payload = { title, questions, ts: Date.now() };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
-  const short = encoded.substring(0, 60) + '…';
-
-  document.getElementById('publish-area').innerHTML = `
+async function renderPublish(title, questions) {
+  const area = document.getElementById('publish-area');
+  area.innerHTML = `
     <div class="card">
       <div class="card-title">Publish quiz</div>
-      <div class="card-sub">Copy the quiz code below and share it with your study circle participants</div>
-      <label>Quiz code to share</label>
-      <div class="data-box" id="quiz-data-box">${short}</div>
-      <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap;">
-        <button class="btn btn-sm" onclick="copyQuizCode('${encoded}')">Copy full code</button>
-        <button class="btn btn-sm" onclick="toggleExpand()">Show full</button>
-        <span class="copied" id="copy-confirm" style="display:none;">Copied!</span>
-      </div>
-      <hr class="divider" />
-      <p style="font-size:13px;color:var(--ink-light);">Paste this code when you share the quiz each week. Participants paste it in the <strong>Take Quiz</strong> tab.</p>
-      <div class="row-end" style="margin-top:0;">
-        <button class="btn btn-green" onclick="publishAndSetActive('${encodeURIComponent(JSON.stringify(payload))}')">Set as active quiz</button>
-      </div>
+      <div class="card-sub">Generating a short code…</div>
+      <div class="status loading">Saving quiz to the server…</div>
     </div>`;
-  window._encodedQuiz = encoded;
-  window._quizPayload = payload;
+  try {
+    const res = await fetch('/api/quizzes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPw, title, questions })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not publish quiz.');
+    const code = data.code;
+    window._quizCode = code;
+
+    area.innerHTML = `
+      <div class="card">
+        <div class="card-title">Publish quiz</div>
+        <div class="card-sub">Share this short code with your study circle participants</div>
+        <label>Quiz code to share</label>
+        <div class="data-box" id="quiz-data-box" style="font-size:28px;letter-spacing:6px;text-align:center;font-weight:500;color:var(--ink);padding:20px;max-height:none;">${code}</div>
+        <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-sm" onclick="copyQuizCode('${code}')">Copy code</button>
+          <span class="copied" id="copy-confirm" style="display:none;">Copied!</span>
+        </div>
+        <hr class="divider" />
+        <p style="font-size:13px;color:var(--ink-light);">Participants enter this code in the <strong>Take Quiz</strong> tab to begin.</p>
+        <div class="row-end" style="margin-top:0;">
+          <button class="btn btn-green" onclick="publishAndSetActive('${code}')">Set as active quiz</button>
+        </div>
+      </div>`;
+  } catch (err) {
+    area.innerHTML = `
+      <div class="card">
+        <div class="card-title">Publish quiz</div>
+        <div class="status error">${err.message || 'Could not publish quiz.'}</div>
+      </div>`;
+  }
 }
 
-function copyQuizCode(encoded) {
-  navigator.clipboard.writeText(encoded || window._encodedQuiz).then(() => {
+function copyQuizCode(code) {
+  navigator.clipboard.writeText(code || window._quizCode || '').then(() => {
     const el = document.getElementById('copy-confirm');
     if (el) { el.style.display = 'inline'; setTimeout(() => el.style.display = 'none', 2000); }
   });
 }
 
-function toggleExpand() {
-  const box = document.getElementById('quiz-data-box');
-  if (box) {
-    box.classList.toggle('expanded');
-    box.textContent = box.classList.contains('expanded') ? window._encodedQuiz : window._encodedQuiz.substring(0,60) + '…';
-  }
-}
-
-async function publishAndSetActive(payloadStr) {
+function publishAndSetActive(code) {
   try {
-    const payload = JSON.parse(decodeURIComponent(payloadStr));
-    localStorage.setItem('active_quiz', JSON.stringify(payload));
-    setStatus('gen-status', 'Quiz set as active! Participants loading the page will now see this quiz pre-loaded.', 'success');
+    localStorage.setItem('active_quiz_code', code);
+    setStatus('gen-status', 'Quiz set as active! Participants loading the page will see this code pre-filled.', 'success');
   } catch(e) {
     setStatus('gen-status', 'Could not set active quiz.', 'error');
   }
 }
 
 // ─── Load quiz (participant) ──────────────────────────────────
-function loadQuiz() {
+async function loadQuiz() {
   const name = document.getElementById('player-name').value.trim();
-  const raw = document.getElementById('quiz-code-input').value.trim();
+  const code = document.getElementById('quiz-code-input').value.trim().toUpperCase();
   if (!name) { setStatus('load-status', 'Please enter your name.', 'error'); return; }
-  if (!raw) { setStatus('load-status', 'Please paste the quiz code.', 'error'); return; }
+  if (!code) { setStatus('load-status', 'Please enter the quiz code.', 'error'); return; }
+  setStatus('load-status', 'Loading quiz…', 'loading');
   try {
-    const decoded = decodeURIComponent(escape(atob(raw)));
-    quiz = JSON.parse(decoded);
-    quiz.quizId = computeQuizId(quiz.title, quiz.ts);
+    const res = await fetch('/api/quizzes/' + encodeURIComponent(code));
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Quiz not found.');
+    quiz = {
+      title: data.title,
+      questions: data.questions,
+      ts: data.ts,
+      quizId: data.code
+    };
     playerName = name;
     answers = new Array(quiz.questions.length).fill(null);
     currentQ = 0;
+    setStatus('load-status', '', '');
     showStep('step-quiz');
     document.getElementById('q-session-title').textContent = quiz.title;
     renderQuestion();
   } catch(e) {
-    setStatus('load-status', 'Invalid quiz code. Make sure you copied the full code.', 'error');
+    setStatus('load-status', e.message || 'Invalid quiz code. Check with your teacher.', 'error');
   }
 }
 
-// Check for active quiz in localStorage on load
+// Pre-fill the most recently published code if admin marked it active on this device
 window.addEventListener('load', () => {
   try {
-    const active = localStorage.getItem('active_quiz');
-    if (active) {
-      const payload = JSON.parse(active);
-      document.getElementById('quiz-code-input').value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    const code = localStorage.getItem('active_quiz_code');
+    if (code) {
+      document.getElementById('quiz-code-input').value = code;
     }
   } catch(e) {}
 });

@@ -8,6 +8,16 @@ import Anthropic from '@anthropic-ai/sdk';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DATA_DIR = path.join(__dirname, 'data');
 const SCORES_FILE = path.join(DATA_DIR, 'scores.json');
+const QUIZZES_FILE = path.join(DATA_DIR, 'quizzes.json');
+
+const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+function generateShortCode() {
+  let out = '';
+  for (let i = 0; i < 6; i++) {
+    out += CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)];
+  }
+  return out;
+}
 
 const { ANTHROPIC_API_KEY, ADMIN_PASSWORD, PORT = 3000 } = process.env;
 
@@ -72,6 +82,63 @@ app.post('/api/scores', async (req, res) => {
   } catch (err) {
     console.error('scores POST error:', err);
     res.status(500).json({ error: 'Could not save score.' });
+  }
+});
+
+async function readQuizzes() {
+  try {
+    const raw = await fs.readFile(QUIZZES_FILE, 'utf8');
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+async function writeQuizzes(quizzes) {
+  await fs.mkdir(DATA_DIR, { recursive: true });
+  await fs.writeFile(QUIZZES_FILE, JSON.stringify(quizzes, null, 2), 'utf8');
+}
+
+app.post('/api/quizzes', async (req, res) => {
+  const { password, title, questions } = req.body || {};
+  if (password !== ADMIN_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized.' });
+  }
+  if (typeof title !== 'string' || !title.trim() || !Array.isArray(questions) || !questions.length) {
+    return res.status(400).json({ error: 'Title and questions are required.' });
+  }
+  try {
+    const all = await readQuizzes();
+    let code = null;
+    for (let i = 0; i < 10; i++) {
+      const candidate = generateShortCode();
+      if (!all[candidate]) { code = candidate; break; }
+    }
+    if (!code) return res.status(500).json({ error: 'Could not allocate a unique code.' });
+    all[code] = {
+      title: title.trim().substring(0, 200),
+      questions,
+      ts: Date.now()
+    };
+    await writeQuizzes(all);
+    res.json({ code });
+  } catch (err) {
+    console.error('quizzes POST error:', err);
+    res.status(500).json({ error: 'Could not save quiz.' });
+  }
+});
+
+app.get('/api/quizzes/:code', async (req, res) => {
+  try {
+    const code = String(req.params.code || '').toUpperCase();
+    const all = await readQuizzes();
+    const quiz = all[code];
+    if (!quiz) return res.status(404).json({ error: 'Quiz not found. Check the code with your teacher.' });
+    res.json({ code, title: quiz.title, questions: quiz.questions, ts: quiz.ts });
+  } catch (err) {
+    console.error('quizzes GET error:', err);
+    res.status(500).json({ error: 'Could not load quiz.' });
   }
 });
 
