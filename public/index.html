@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quran Study Circle — Weekly Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --cream: #faf7f2;
+    --warm-white: #fff9f2;
+    --parchment: #f0e9da;
+    --gold: #b8860b;
+    --gold-light: #d4a017;
+    --gold-pale: #f5e6c0;
+    --ink: #1c1410;
+    --ink-mid: #3d2f22;
+    --ink-light: #7a6555;
+    --ink-faint: #b5a898;
+    --green: #2d5a3d;
+    --green-light: #e8f2ec;
+    --red-light: #fdf0ee;
+    --red: #8b2e24;
+    --border: rgba(184,134,11,0.18);
+    --border-strong: rgba(184,134,11,0.35);
+    --shadow: 0 2px 24px rgba(28,20,16,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* Geometric background pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(45deg, transparent, transparent 40px, rgba(184,134,11,0.03) 40px, rgba(184,134,11,0.03) 41px),
+      repeating-linear-gradient(-45deg, transparent, transparent 40px, rgba(184,134,11,0.03) 40px, rgba(184,134,11,0.03) 41px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 680px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+
+  /* Header */
+  .site-header {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: var(--gold);
+  }
+  .ornament { font-size: 22px; color: var(--gold); letter-spacing: 8px; margin-bottom: 8px; display: block; }
+  .site-header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+  .site-header p { font-size: 13px; color: var(--ink-light); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* Nav tabs */
+  .nav { display: flex; gap: 0; margin-bottom: 2rem; border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; background: var(--warm-white); }
+  .nav-btn {
+    flex: 1; padding: 11px 16px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    font-weight: 500; letter-spacing: 0.03em; cursor: pointer; border: none;
+    background: transparent; color: var(--ink-light); transition: all 0.2s;
+  }
+  .nav-btn:not(:last-child) { border-right: 1px solid var(--border); }
+  .nav-btn.active { background: var(--gold); color: white; }
+  .nav-btn:hover:not(.active) { background: var(--parchment); color: var(--ink); }
+
+  /* Card */
+  .card {
+    background: var(--warm-white);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.75rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 19px; font-weight: 600; color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .card-sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 1.25rem; letter-spacing: 0.03em; }
+
+  /* Form elements */
+  label { font-size: 12px; color: var(--ink-light); letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+  input[type="text"], textarea, input[type="password"] {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    background: var(--cream); border: 1px solid var(--border-strong); border-radius: 8px;
+    color: var(--ink); outline: none; transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, textarea:focus, input[type="password"]:focus { border-color: var(--gold); }
+  textarea { min-height: 140px; resize: vertical; line-height: 1.6; }
+  .field { margin-bottom: 1rem; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 20px; border-radius: 8px; font-size: 13px;
+    font-family: 'DM Sans', sans-serif; font-weight: 500; cursor: pointer;
+    border: 1px solid var(--border-strong); background: var(--warm-white);
+    color: var(--ink-mid); transition: all 0.18s; letter-spacing: 0.02em;
+  }
+  .btn:hover { background: var(--parchment); }
+  .btn-gold { background: var(--gold); border-color: var(--gold); color: white; }
+  .btn-gold:hover { background: #a07608; border-color: #a07608; }
+  .btn-gold:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-green { background: var(--green); border-color: var(--green); color: white; }
+  .btn-green:hover { background: #1f3e2a; }
+  .btn-sm { padding: 7px 14px; font-size: 12px; }
+
+  /* Status */
+  .status {
+    padding: 10px 14px; border-radius: 8px; font-size: 13px; margin-bottom: 1rem;
+    background: var(--parchment); color: var(--ink-mid); border: 1px solid var(--border);
+  }
+  .status.error { background: var(--red-light); color: var(--red); border-color: rgba(139,46,36,0.2); }
+  .status.success { background: var(--green-light); color: var(--green); border-color: rgba(45,90,61,0.2); }
+  .status.loading { color: var(--gold); border-color: var(--border-strong); }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 1.5rem; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-faint); margin-bottom: 6px; }
+  .progress-track { height: 3px; background: var(--parchment); border-radius: 99px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--gold); border-radius: 99px; transition: width 0.4s ease; }
+
+  /* Question card */
+  .q-card { background: var(--warm-white); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow); }
+  .q-label { font-size: 11px; color: var(--gold); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+  .q-text { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; color: var(--ink); line-height: 1.4; margin-bottom: 1.25rem; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .opt-btn {
+    text-align: left; padding: 11px 16px; border-radius: 8px;
+    border: 1px solid var(--border-strong); background: var(--cream);
+    color: var(--ink-mid); font-size: 14px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.18s; line-height: 1.4;
+  }
+  .opt-btn:hover { background: var(--gold-pale); border-color: var(--gold); color: var(--ink); }
+  .opt-btn.selected { border-color: var(--gold); background: var(--gold-pale); color: var(--ink); }
+  .opt-btn.correct { background: var(--green-light); border-color: var(--green); color: var(--green); font-weight: 500; }
+  .opt-btn.wrong { background: var(--red-light); border-color: rgba(139,46,36,0.3); color: var(--red); }
+  .opt-btn:disabled { cursor: default; }
+
+  /* Result */
+  .result-score {
+    text-align: center; padding: 2rem 0 1.5rem;
+  }
+  .score-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 72px; font-weight: 600; color: var(--gold); line-height: 1;
+  }
+  .score-denom { font-size: 32px; color: var(--ink-faint); }
+  .score-msg { font-size: 15px; color: var(--ink-light); margin-top: 8px; }
+  .stat-row { display: flex; gap: 10px; margin: 1.25rem 0; }
+  .stat { flex: 1; background: var(--cream); border: 1px solid var(--border); border-radius: 10px; padding: 12px; text-align: center; }
+  .stat-n { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; color: var(--ink); }
+  .stat-l { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+
+  /* Admin panel */
+  .admin-gate { text-align: center; padding: 1rem 0; }
+  .admin-gate p { font-size: 13px; color: var(--ink-light); margin-bottom: 1rem; }
+
+  /* Generated questions list */
+  .gen-q { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .gen-q:last-child { border-bottom: none; }
+  .gen-q-num { font-size: 11px; color: var(--gold); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 3px; }
+  .gen-q-text { font-size: 14px; color: var(--ink); margin-bottom: 6px; }
+  .gen-q-opts { display: flex; flex-direction: column; gap: 2px; }
+  .gen-q-opt { font-size: 12px; color: var(--ink-light); }
+  .gen-q-opt.correct { color: var(--green); font-weight: 500; }
+
+  /* Quiz data box */
+  .data-box {
+    background: var(--cream); border: 1px solid var(--border-strong); border-radius: 8px;
+    padding: 12px 14px; font-size: 12px; font-family: monospace;
+    color: var(--ink-light); word-break: break-all; max-height: 80px;
+    overflow: hidden; position: relative;
+  }
+  .data-box.expanded { max-height: none; }
+
+  /* Leaderboard */
+  .lb-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid var(--border);
+    animation: fadeUp 0.3s ease both;
+  }
+  .lb-row:last-child { border-bottom: none; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  .lb-rank { font-family: 'Cormorant Garamond', serif; font-size: 20px; color: var(--ink-faint); width: 32px; text-align: center; }
+  .lb-rank.top { color: var(--gold); font-weight: 600; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%; background: var(--parchment);
+    border: 1px solid var(--border-strong); display: flex; align-items: center;
+    justify-content: center; font-size: 12px; font-weight: 500; color: var(--ink-mid);
+    flex-shrink: 0;
+  }
+  .lb-name { flex: 1; font-size: 14px; color: var(--ink); }
+  .lb-score { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 600; color: var(--ink); }
+  .lb-pct { font-size: 12px; color: var(--ink-faint); margin-left: 4px; }
+  .lb-bar-wrap { width: 80px; height: 4px; background: var(--parchment); border-radius: 99px; overflow: hidden; }
+  .lb-bar { height: 100%; background: var(--gold); border-radius: 99px; }
+
+  /* Step visibility */
+  .step { display: none; }
+  .step.active { display: block; }
+
+  /* Row util */
+  .row { display: flex; gap: 10px; align-items: center; }
+  .row-end { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1rem; }
+
+  /* Divider */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 1.25rem 0; }
+  .divider-gold { border-top-color: var(--gold); opacity: 0.3; }
+
+  /* Copy success flash */
+  .copied { font-size: 12px; color: var(--green); }
+
+  @media (max-width: 480px) {
+    .site-header h1 { font-size: 26px; }
+    .q-text { font-size: 17px; }
+    .score-num { font-size: 56px; }
+    .lb-bar-wrap { display: none; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <header class="site-header">
+    <span class="ornament">✦ ✦ ✦</span>
+    <h1>Quran Study Circle</h1>
+    <p>Weekly Quiz</p>
+  </header>
+
+  <!-- Nav -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchTab('quiz')">Take Quiz</button>
+    <button class="nav-btn" onclick="switchTab('leaderboard')">Leaderboard</button>
+    <button class="nav-btn" onclick="switchTab('admin')">Admin</button>
+  </nav>
+
+  <!-- ═══════════════════════════ QUIZ TAB ═══════════════════════════ -->
+  <div id="tab-quiz">
+
+    <!-- Step: Load -->
+    <div id="step-load" class="step active">
+      <div class="card">
+        <div class="card-title">Welcome</div>
+        <div class="card-sub">Enter your name and paste the quiz code shared by your teacher</div>
+        <div class="field">
+          <label>Your name</label>
+          <input type="text" id="player-name" placeholder="e.g. Aisha Malik" />
+        </div>
+        <div class="field">
+          <label>Quiz code</label>
+          <textarea id="quiz-code-input" placeholder="Paste the quiz code here..." style="min-height:90px;"></textarea>
+        </div>
+        <div id="load-status"></div>
+        <div class="row-end">
+          <button class="btn btn-gold" onclick="loadQuiz()">Begin Quiz →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step: Quiz -->
+    <div id="step-quiz" class="step">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span id="q-progress-text">Question 1 of 15</span>
+          <span id="q-session-title" style="color:var(--gold);font-size:12px;"></span>
+        </div>
+        <div class="progress-track"><div class="progress-bar" id="q-progress-bar" style="width:0%"></div></div>
+      </div>
+      <div id="question-area"></div>
+      <div class="row-end">
+        <button class="btn btn-gold" id="next-btn" onclick="nextQuestion()" style="display:none;">Next →</button>
+      </div>
+    </div>
+
+    <!-- Step: Result -->
+    <div id="step-result" class="step">
+      <div class="card">
+        <div class="result-score">
+          <div class="score-num" id="result-num">0<span class="score-denom">/15</span></div>
+          <div class="score-msg" id="result-msg"></div>
+        </div>
+        <hr class="divider divider-gold" />
+        <div class="stat-row">
+          <div class="stat"><div class="stat-n" id="stat-correct">0</div><div class="stat-l">Correct</div></div>
+          <div class="stat"><div class="stat-n" id="stat-wrong">0</div><div class="stat-l">Wrong</div></div>
+          <div class="stat"><div class="stat-n" id="stat-pct">0%</div><div class="stat-l">Score</div></div>
+        </div>
+        <div class="row-end">
+          <button class="btn" onclick="retakeQuiz()">Retake</button>
+          <button class="btn btn-gold" onclick="switchTab('leaderboard')">View Leaderboard →</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════ LEADERBOARD TAB ═══════════════════════════ -->
+  <div id="tab-leaderboard" style="display:none;">
+    <div class="card">
+      <div class="card-title">Leaderboard</div>
+      <div class="card-sub" id="lb-session-label">This week's quiz results</div>
+      <div id="lb-area"><p style="font-size:14px;color:var(--ink-faint);padding:1rem 0;">No scores yet. Be the first to complete the quiz!</p></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════ ADMIN TAB ═══════════════════════════ -->
+  <div id="tab-admin" style="display:none;">
+
+    <!-- Admin gate -->
+    <div id="admin-gate">
+      <div class="card">
+        <div class="card-title">Admin Access</div>
+        <div class="card-sub">Enter your admin password to access quiz generation</div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="admin-pw-input" placeholder="Enter password..." onkeydown="if(event.key==='Enter')checkAdminPw()" />
+        </div>
+        <div id="admin-gate-status"></div>
+        <div class="row-end">
+          <button class="btn btn-gold" onclick="checkAdminPw()">Enter →</button>
+        </div>
+        <hr class="divider" />
+        <p style="font-size:12px;color:var(--ink-faint);">Password is set in the server's <strong>.env</strong> file (ADMIN_PASSWORD).</p>
+      </div>
+    </div>
+
+    <!-- Admin panel -->
+    <div id="admin-panel" style="display:none;">
+
+      <div class="card">
+        <div class="card-title">Generate this week's quiz</div>
+        <div class="card-sub">Paste your tafseer text — Claude will generate 15 MCQs</div>
+        <div class="field">
+          <label>Session title</label>
+          <input type="text" id="admin-session-title" placeholder="e.g. Surah Al-Baqarah, Ayat 1–20 — Week 5" />
+        </div>
+        <div class="field">
+          <label>Tafseer text</label>
+          <textarea id="admin-tafseer" placeholder="Paste your tafseer notes or study material here..." style="min-height:200px;"></textarea>
+        </div>
+        <div id="gen-status"></div>
+        <div class="row-end">
+          <button class="btn btn-gold" id="gen-btn" onclick="generateQuiz()">Generate 15 Questions →</button>
+        </div>
+      </div>
+
+      <div id="preview-area"></div>
+
+      <div id="publish-area"></div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── State ────────────────────────────────────────────────────
+let quiz = null;
+let currentQ = 0;
+let answers = [];
+let playerName = '';
+let generatedQuestions = [];
+let adminPw = ''; // held in memory after successful verify; used to authorize generate calls
+
+function computeQuizId(title, ts) {
+  return btoa(unescape(encodeURIComponent((title || '') + '|' + (ts || '')))).replace(/[^a-zA-Z0-9]/g, '').substring(0, 24);
+}
+
+// ─── Tab switching ────────────────────────────────────────────
+function switchTab(tab) {
+  ['quiz','leaderboard','admin'].forEach(t => {
+    document.getElementById('tab-' + t).style.display = t === tab ? 'block' : 'none';
+  });
+  document.querySelectorAll('.nav-btn').forEach((b, i) => {
+    b.classList.toggle('active', ['quiz','leaderboard','admin'][i] === tab);
+  });
+  if (tab === 'leaderboard') renderLeaderboard();
+}
+
+// ─── Admin gate ───────────────────────────────────────────────
+async function checkAdminPw() {
+  const pw = document.getElementById('admin-pw-input').value;
+  try {
+    const res = await fetch('/api/admin/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw })
+    });
+    const data = await res.json();
+    if (res.ok && data.ok) {
+      adminPw = pw;
+      document.getElementById('admin-gate').style.display = 'none';
+      document.getElementById('admin-panel').style.display = 'block';
+    } else {
+      document.getElementById('admin-gate-status').innerHTML = '<div class="status error">' + (data.error || 'Incorrect password.') + '</div>';
+    }
+  } catch (e) {
+    document.getElementById('admin-gate-status').innerHTML = '<div class="status error">Could not reach the server.</div>';
+  }
+}
+
+// ─── Generate quiz ────────────────────────────────────────────
+async function generateQuiz() {
+  const title = document.getElementById('admin-session-title').value.trim();
+  const text = document.getElementById('admin-tafseer').value.trim();
+  if (!title) { setStatus('gen-status', 'Please enter a session title.', 'error'); return; }
+  if (!text) { setStatus('gen-status', 'Please paste some tafseer text.', 'error'); return; }
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.textContent = 'Generating…';
+  setStatus('gen-status', 'Asking Claude to generate 15 questions from your tafseer text…', 'loading');
+  document.getElementById('preview-area').innerHTML = '';
+  document.getElementById('publish-area').innerHTML = '';
+
+  try {
+    const res = await fetch('/api/generate-quiz', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: adminPw, title, text })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Generation failed.');
+    const questions = data.questions;
+    generatedQuestions = questions;
+    setStatus('gen-status', `${questions.length} questions generated. Review below, then publish.`, 'success');
+    renderPreview(questions);
+    renderPublish(title, questions);
+  } catch(err) {
+    setStatus('gen-status', 'Error: ' + (err.message || 'Could not generate quiz.'), 'error');
+    console.error(err);
+  }
+  btn.disabled = false; btn.textContent = 'Regenerate Questions →';
+}
+
+function renderPreview(questions) {
+  let html = '<div class="card"><div class="card-title">Preview</div><div class="card-sub">Correct answers shown in green</div>';
+  questions.forEach((q, i) => {
+    html += `<div class="gen-q">
+      <div class="gen-q-num">Q${i+1}</div>
+      <div class="gen-q-text">${q.q}</div>
+      <div class="gen-q-opts">`;
+    q.options.forEach(opt => {
+      const isCor = opt.startsWith(q.answer + '.');
+      html += `<div class="gen-q-opt${isCor ? ' correct' : ''}">${isCor ? '✓ ' : ''}${opt}</div>`;
+    });
+    html += `</div></div>`;
+  });
+  html += '</div>';
+  document.getElementById('preview-area').innerHTML = html;
+}
+
+function renderPublish(title, questions) {
+  const payload = { title, questions, ts: Date.now() };
+  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+  const short = encoded.substring(0, 60) + '…';
+
+  document.getElementById('publish-area').innerHTML = `
+    <div class="card">
+      <div class="card-title">Publish quiz</div>
+      <div class="card-sub">Copy the quiz code below and share it with your study circle participants</div>
+      <label>Quiz code to share</label>
+      <div class="data-box" id="quiz-data-box">${short}</div>
+      <div class="row" style="margin-top:10px;gap:8px;flex-wrap:wrap;">
+        <button class="btn btn-sm" onclick="copyQuizCode('${encoded}')">Copy full code</button>
+        <button class="btn btn-sm" onclick="toggleExpand()">Show full</button>
+        <span class="copied" id="copy-confirm" style="display:none;">Copied!</span>
+      </div>
+      <hr class="divider" />
+      <p style="font-size:13px;color:var(--ink-light);">Paste this code when you share the quiz each week. Participants paste it in the <strong>Take Quiz</strong> tab.</p>
+      <div class="row-end" style="margin-top:0;">
+        <button class="btn btn-green" onclick="publishAndSetActive('${encodeURIComponent(JSON.stringify(payload))}')">Set as active quiz</button>
+      </div>
+    </div>`;
+  window._encodedQuiz = encoded;
+  window._quizPayload = payload;
+}
+
+function copyQuizCode(encoded) {
+  navigator.clipboard.writeText(encoded || window._encodedQuiz).then(() => {
+    const el = document.getElementById('copy-confirm');
+    if (el) { el.style.display = 'inline'; setTimeout(() => el.style.display = 'none', 2000); }
+  });
+}
+
+function toggleExpand() {
+  const box = document.getElementById('quiz-data-box');
+  if (box) {
+    box.classList.toggle('expanded');
+    box.textContent = box.classList.contains('expanded') ? window._encodedQuiz : window._encodedQuiz.substring(0,60) + '…';
+  }
+}
+
+async function publishAndSetActive(payloadStr) {
+  try {
+    const payload = JSON.parse(decodeURIComponent(payloadStr));
+    localStorage.setItem('active_quiz', JSON.stringify(payload));
+    setStatus('gen-status', 'Quiz set as active! Participants loading the page will now see this quiz pre-loaded.', 'success');
+  } catch(e) {
+    setStatus('gen-status', 'Could not set active quiz.', 'error');
+  }
+}
+
+// ─── Load quiz (participant) ──────────────────────────────────
+function loadQuiz() {
+  const name = document.getElementById('player-name').value.trim();
+  const raw = document.getElementById('quiz-code-input').value.trim();
+  if (!name) { setStatus('load-status', 'Please enter your name.', 'error'); return; }
+  if (!raw) { setStatus('load-status', 'Please paste the quiz code.', 'error'); return; }
+  try {
+    const decoded = decodeURIComponent(escape(atob(raw)));
+    quiz = JSON.parse(decoded);
+    quiz.quizId = computeQuizId(quiz.title, quiz.ts);
+    playerName = name;
+    answers = new Array(quiz.questions.length).fill(null);
+    currentQ = 0;
+    showStep('step-quiz');
+    document.getElementById('q-session-title').textContent = quiz.title;
+    renderQuestion();
+  } catch(e) {
+    setStatus('load-status', 'Invalid quiz code. Make sure you copied the full code.', 'error');
+  }
+}
+
+// Check for active quiz in localStorage on load
+window.addEventListener('load', () => {
+  try {
+    const active = localStorage.getItem('active_quiz');
+    if (active) {
+      const payload = JSON.parse(active);
+      document.getElementById('quiz-code-input').value = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+    }
+  } catch(e) {}
+});
+
+// ─── Quiz logic ───────────────────────────────────────────────
+function renderQuestion() {
+  const q = quiz.questions[currentQ];
+  const total = quiz.questions.length;
+  document.getElementById('q-progress-text').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('q-progress-bar').style.width = ((currentQ / total) * 100) + '%';
+  document.getElementById('next-btn').style.display = 'none';
+
+  let html = `<div class="q-card">
+    <div class="q-label">Question ${currentQ + 1}</div>
+    <div class="q-text">${q.q}</div>
+    <div class="options">`;
+  q.options.forEach((opt, i) => {
+    html += `<button class="opt-btn" onclick="selectAnswer(${i})" id="opt-${i}">${opt}</button>`;
+  });
+  html += `</div></div>`;
+  document.getElementById('question-area').innerHTML = html;
+}
+
+function selectAnswer(idx) {
+  if (answers[currentQ] !== null) return;
+  answers[currentQ] = idx;
+  const q = quiz.questions[currentQ];
+  q.options.forEach((opt, i) => {
+    const btn = document.getElementById('opt-' + i);
+    btn.onclick = null; btn.disabled = true;
+    if (opt.startsWith(q.answer + '.')) btn.classList.add('correct');
+    else if (i === idx) btn.classList.add('wrong');
+  });
+  document.getElementById('next-btn').style.display = 'inline-flex';
+  document.getElementById('next-btn').textContent =
+    currentQ < quiz.questions.length - 1 ? 'Next →' : 'See Results →';
+}
+
+function nextQuestion() {
+  if (currentQ < quiz.questions.length - 1) {
+    currentQ++;
+    renderQuestion();
+  } else {
+    finishQuiz();
+  }
+}
+
+async function finishQuiz() {
+  let correct = 0;
+  quiz.questions.forEach((q, i) => {
+    if (answers[i] !== null && q.options[answers[i]].startsWith(q.answer + '.')) correct++;
+  });
+  const total = quiz.questions.length;
+  const pct = Math.round((correct / total) * 100);
+
+  document.getElementById('result-num').innerHTML = `${correct}<span class="score-denom">/${total}</span>`;
+  document.getElementById('stat-correct').textContent = correct;
+  document.getElementById('stat-wrong').textContent = total - correct;
+  document.getElementById('stat-pct').textContent = pct + '%';
+
+  const msgs = [
+    'Keep going — every session is a step forward.',
+    'Good effort! Review the notes and try again.',
+    'Solid! You are building your knowledge.',
+    'Very good — mashallah, well done!',
+    'Excellent! A remarkable result — mashallah!'
+  ];
+  document.getElementById('result-msg').textContent =
+    pct >= 90 ? msgs[4] : pct >= 75 ? msgs[3] : pct >= 55 ? msgs[2] : pct >= 35 ? msgs[1] : msgs[0];
+
+  showStep('step-result');
+
+  // Save to shared leaderboard on server
+  try {
+    await fetch('/api/scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quizId: quiz.quizId,
+        quizTitle: quiz.title,
+        name: playerName,
+        correct,
+        total,
+        pct
+      })
+    });
+  } catch(e) {
+    console.error('Could not save score:', e);
+  }
+}
+
+function retakeQuiz() {
+  answers = new Array(quiz.questions.length).fill(null);
+  currentQ = 0;
+  showStep('step-quiz');
+  renderQuestion();
+}
+
+// ─── Leaderboard ──────────────────────────────────────────────
+async function renderLeaderboard() {
+  const area = document.getElementById('lb-area');
+  if (!quiz) {
+    area.innerHTML = '<p style="font-size:14px;color:var(--ink-faint);padding:1rem 0;">Load the quiz first (paste the code in the Take Quiz tab), then come back to see everyone\'s scores.</p>';
+    return;
+  }
+  document.getElementById('lb-session-label').textContent = quiz.title;
+  area.innerHTML = '<p style="font-size:14px;color:var(--ink-faint);padding:1rem 0;">Loading…</p>';
+  try {
+    const res = await fetch('/api/scores/' + encodeURIComponent(quiz.quizId));
+    const data = await res.json();
+    const scores = (data.scores || []);
+    if (!scores.length) {
+      area.innerHTML = '<p style="font-size:14px;color:var(--ink-faint);padding:1rem 0;">No scores yet — be the first!</p>';
+      return;
+    }
+    let html = '';
+    scores.forEach((s, i) => {
+      const initials = s.name.split(' ').map(w => w[0] || '').join('').toUpperCase().substring(0, 2);
+      const medal = i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : (i + 1) + 'th';
+      html += `<div class="lb-row" style="animation-delay:${i * 0.05}s">
+        <div class="lb-rank ${i < 3 ? 'top' : ''}">${medal}</div>
+        <div class="avatar">${initials}</div>
+        <div class="lb-name">${s.name}</div>
+        <div class="lb-bar-wrap"><div class="lb-bar" style="width:${s.pct}%"></div></div>
+        <div class="lb-score">${s.correct}/${s.total}<span class="lb-pct">${s.pct}%</span></div>
+      </div>`;
+    });
+    area.innerHTML = html;
+  } catch(e) {
+    area.innerHTML = '<p style="font-size:13px;color:var(--red);">Could not load leaderboard.</p>';
+  }
+}
+
+// ─── Helpers ──────────────────────────────────────────────────
+function showStep(id) {
+  ['step-load','step-quiz','step-result'].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) el.classList.toggle('active', s === id);
+  });
+}
+
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = msg ? `<div class="status ${type || ''}">${msg}</div>` : '';
+}
+</script>
+</body>
+</html>
