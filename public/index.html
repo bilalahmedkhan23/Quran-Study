@@ -291,7 +291,7 @@
     <div id="step-quiz" class="step">
       <div class="progress-wrap">
         <div class="progress-label">
-          <span id="q-progress-text">Question 1 of 15</span>
+          <span id="q-progress-text">Question 1 of 10</span>
           <span id="q-session-title" style="color:var(--gold);font-size:12px;"></span>
         </div>
         <div class="progress-track"><div class="progress-bar" id="q-progress-bar" style="width:0%"></div></div>
@@ -306,7 +306,7 @@
     <div id="step-result" class="step">
       <div class="card">
         <div class="result-score">
-          <div class="score-num" id="result-num">0<span class="score-denom">/15</span></div>
+          <div class="score-num" id="result-num">0<span class="score-denom">/10</span></div>
           <div class="score-msg" id="result-msg"></div>
         </div>
         <hr class="divider divider-gold" />
@@ -359,7 +359,7 @@
 
       <div class="card">
         <div class="card-title">Generate this week's quiz</div>
-        <div class="card-sub">Paste your tafseer text — Claude will generate 15 MCQs</div>
+        <div class="card-sub">Paste your tafseer text — Claude will generate 10 MCQs</div>
         <div class="field">
           <label>Session title</label>
           <input type="text" id="admin-session-title" placeholder="e.g. Surah Al-Baqarah, Ayat 1–20 — Week 5" />
@@ -370,7 +370,7 @@
         </div>
         <div id="gen-status"></div>
         <div class="row-end">
-          <button class="btn btn-gold" id="gen-btn" onclick="generateQuiz()">Generate 15 Questions →</button>
+          <button class="btn btn-gold" id="gen-btn" onclick="generateQuiz()">Generate 10 Questions →</button>
         </div>
       </div>
 
@@ -434,7 +434,7 @@ async function generateQuiz() {
 
   const btn = document.getElementById('gen-btn');
   btn.disabled = true; btn.textContent = 'Generating…';
-  setStatus('gen-status', 'Asking Claude to generate 15 questions from your tafseer text…', 'loading');
+  setStatus('gen-status', 'Asking Claude to generate 10 questions from your tafseer text…', 'loading');
   document.getElementById('preview-area').innerHTML = '';
   document.getElementById('publish-area').innerHTML = '';
 

@@ -172,7 +172,7 @@ app.post('/api/generate-quiz', async (req, res) => {
       max_tokens: 3500,
       messages: [{
         role: 'user',
-        content: `You are a Quran tafseer educator creating a quiz for a weekly study circle. Based on the following tafseer text, generate exactly 15 multiple choice questions. Questions should test deep understanding — not just surface recall. Include questions about meanings, context, lessons, and linguistic insights where possible.
+        content: `You are a Quran tafseer educator creating a quiz for a weekly study circle. Based on the following tafseer text, generate exactly 10 multiple choice questions. Questions should test deep understanding — not just surface recall. Include questions about meanings, context, lessons, and linguistic insights where possible.
 
 Return ONLY a valid JSON array, no markdown fences, no preamble, no commentary. Format exactly:
 [{"q":"Question?","options":["A. option","B. option","C. option","D. option"],"answer":"A"}]
